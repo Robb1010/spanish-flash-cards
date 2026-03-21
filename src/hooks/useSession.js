@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { getUserId } from '../lib/userId';
+import { ensureUser } from '../lib/userId';
 import { sm2, qualityMap } from '../lib/sm2';
 
 export function useSession(deck) {
@@ -10,7 +10,7 @@ export function useSession(deck) {
   const sessionId = useRef(null);
 
   async function startSession() {
-    const userId = getUserId();
+    const userId = await ensureUser();
     const { data } = await supabase
       .from('sessions')
       .insert({ user_id: userId, cards_seen: 0, cards_correct: 0, cards_wrong: 0 })
@@ -20,7 +20,7 @@ export function useSession(deck) {
   }
 
   async function recordAnswer(card, quality) {
-    const userId = getUserId();
+    const userId = await ensureUser();
     const qualityScore = typeof quality === 'string' ? qualityMap[quality] : quality;
     const isCorrect = qualityScore >= 3;
 

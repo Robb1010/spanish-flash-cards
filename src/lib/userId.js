@@ -1,10 +1,18 @@
-import { v4 as uuidv4 } from 'uuid';
+import { supabase } from './supabase';
 
-export function getUserId() {
-  let id = localStorage.getItem('anon_user_id');
-  if (!id) {
-    id = uuidv4();
-    localStorage.setItem('anon_user_id', id);
+let cachedUserId = null;
+
+export async function ensureUser() {
+  if (cachedUserId) return cachedUserId;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    cachedUserId = session.user.id;
+    return cachedUserId;
   }
-  return id;
+
+  const { data, error } = await supabase.auth.signInAnonymously();
+  if (error) throw error;
+  cachedUserId = data.user.id;
+  return cachedUserId;
 }

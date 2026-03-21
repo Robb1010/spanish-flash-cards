@@ -3,6 +3,12 @@
 -- Run this entire file in the Supabase SQL Editor (one shot).
 -- ============================================================
 
+-- 0. DROP EXISTING TABLES (if re-running) -------------------
+
+drop table if exists sessions cascade;
+drop table if exists card_progress cascade;
+drop table if exists cards cascade;
+
 -- 1. SCHEMA ------------------------------------------------
 
 -- Cards master table (seed once, never changes during play)
@@ -20,7 +26,7 @@ create table cards (
 -- Per-user spaced repetition state (one row per user+card pair)
 create table card_progress (
   id              uuid primary key default gen_random_uuid(),
-  user_id         text not null,
+  user_id         uuid not null default auth.uid(),
   card_id         uuid references cards(id) on delete cascade,
   ease_factor     float default 2.5,
   interval_days   int default 0,
@@ -33,7 +39,7 @@ create table card_progress (
 -- Session history (one row per completed session)
 create table sessions (
   id            uuid primary key default gen_random_uuid(),
-  user_id       text not null,
+  user_id       uuid not null default auth.uid(),
   started_at    timestamptz default now(),
   ended_at      timestamptz,
   cards_seen    int default 0,
@@ -51,12 +57,13 @@ alter table sessions enable row level security;
 create policy "read cards" on cards
   for select using (true);
 
--- Personal-use open policies (anon key only you have)
-create policy "all card_progress" on card_progress
-  for all using (true) with check (true);
+-- Users can only access their own progress
+create policy "own card_progress" on card_progress
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
-create policy "all sessions" on sessions
-  for all using (true) with check (true);
+-- Users can only access their own sessions
+create policy "own sessions" on sessions
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- 3. SEED DATA ---------------------------------------------
 

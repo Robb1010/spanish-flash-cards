@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { getUserId } from '../lib/userId';
+import { ensureUser } from '../lib/userId';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -21,7 +21,7 @@ export function useDeck() {
   async function loadDeck() {
     setLoading(true);
     setError(null);
-    const userId = getUserId();
+    const userId = await ensureUser();
 
     try {
       const [{ data: cards, error: cardsErr }, { data: progress, error: progErr }] =
@@ -53,10 +53,9 @@ export function useDeck() {
             },
           };
         })
-        .filter((card) => new Date(card.progress.due_at) <= now)
-        .slice(0, SESSION_LIMIT);
+        .filter((card) => new Date(card.progress.due_at) <= now);
 
-      setDeck(shuffle(dueCards));
+      setDeck(shuffle(dueCards).slice(0, SESSION_LIMIT));
     } catch (err) {
       setError(err.message);
     } finally {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const TENSE_COLOR = {
   present: { badge: '#2980b9', label: 'Presente' },
@@ -12,6 +12,7 @@ export default function Flashcard({ card, onAnswer }) {
   const [shake, setShake] = useState(false);
   const [pop, setPop] = useState(false);
   const [hintUsed, setHintUsed] = useState(false);
+  const cardRef = useRef(null);
 
   const tenseInfo = TENSE_COLOR[card.tense] || TENSE_COLOR.present;
 
@@ -37,6 +38,7 @@ export default function Flashcard({ card, onAnswer }) {
       setTimeout(() => setShake(false), 500);
     }
     setRevealed(true);
+    setTimeout(() => cardRef.current?.focus(), 0);
   }
 
   function handleNext() {
@@ -55,7 +57,7 @@ export default function Flashcard({ card, onAnswer }) {
   }
 
   return (
-    <div className={`card ${shake ? 'shake' : ''} ${pop ? 'pop' : ''}`}>
+    <div ref={cardRef} className={`card ${shake ? 'shake' : ''} ${pop ? 'pop' : ''}`} tabIndex={-1} onKeyDown={handleKey}>
       <span className="tense-badge" style={{ background: tenseInfo.badge }}>
         {tenseInfo.label}
       </span>
@@ -75,7 +77,7 @@ export default function Flashcard({ card, onAnswer }) {
       <div className="input-area">
         <input
           type="text"
-          placeholder="conjugation\u2026"
+          placeholder="conjugation…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKey}
@@ -85,18 +87,20 @@ export default function Flashcard({ card, onAnswer }) {
           disabled={revealed}
           autoFocus
         />
-        {!revealed && !hintUsed && (
-          <button className="btn-hint" onClick={showHint} type="button">
-            Hint
+        <div className="input-buttons">
+          {!revealed && !hintUsed && (
+            <button className="btn-hint" onClick={showHint} type="button">
+              Hint
+            </button>
+          )}
+          <button
+            className="btn-check"
+            onClick={checkAnswer}
+            disabled={revealed || !input.trim()}
+          >
+            Check
           </button>
-        )}
-        <button
-          className="btn-check"
-          onClick={checkAnswer}
-          disabled={revealed || !input.trim()}
-        >
-          Check
-        </button>
+        </div>
       </div>
 
       {revealed && (
