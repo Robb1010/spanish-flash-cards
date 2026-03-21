@@ -20,7 +20,8 @@ create table cards (
   level       text not null default 'A2' check (level in ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')),
   answer      text not null,
   hint        text,
-  created_at  timestamptz default now()
+  created_at  timestamptz default now(),
+  unique (verb, pronoun, tense)
 );
 
 -- Per-user spaced repetition state (one row per user+card pair)
