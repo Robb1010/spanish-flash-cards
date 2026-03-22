@@ -2,15 +2,22 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ensureUser } from '../lib/userId';
 import { shuffle } from '../lib/shuffle';
+import { loadSession } from '../lib/sessionStore';
 
-const SESSION_LIMIT = 20;
-
-export function useDeck() {
+export function useDeck(deckSize) {
   const [deck, setDeck] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  async function loadDeck() {
+  async function loadDeck(fresh = false) {
+    if (!fresh) {
+      const saved = loadSession();
+      if (saved?.deck?.length) {
+        setDeck(saved.deck);
+        setLoading(false);
+        return;
+      }
+    }
     setLoading(true);
     setError(null);
     const userId = await ensureUser();
@@ -44,7 +51,7 @@ export function useDeck() {
         })
         .filter((card) => new Date(card.progress.due_at) <= now);
 
-      setDeck(shuffle(dueCards).slice(0, SESSION_LIMIT));
+      setDeck(shuffle(dueCards).slice(0, deckSize));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -54,7 +61,7 @@ export function useDeck() {
 
   useEffect(() => {
     loadDeck();
-  }, []);
+  }, [deckSize]);
 
-  return { deck, loading, error, reload: loadDeck };
+  return { deck, loading, error, reload: () => loadDeck(true) };
 }

@@ -2,10 +2,12 @@ import { useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { ensureUser } from '../lib/userId';
 import { sm2, qualityMap } from '../lib/sm2';
+import { loadSession } from '../lib/sessionStore';
 
 export function useSession(deck) {
-  const [index, setIndex] = useState(0);
-  const [score, setScore] = useState({ correct: 0, wrong: 0 });
+  const _saved = loadSession();
+  const [index, setIndex] = useState(_saved?.index ?? 0);
+  const [score, setScore] = useState(_saved?.score ?? { correct: 0, wrong: 0 });
   const [done, setDone] = useState(false);
   const sessionId = useRef(null);
 

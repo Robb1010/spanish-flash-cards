@@ -5,15 +5,10 @@ export default function StatusScreen({ message, detail, variant }) {
     'state-message';
 
   return (
-    <div className="container">
-      <div className="header">
-        <h1>Espa&ntilde;ol</h1>
-        <p>Verb Conjugation Trainer</p>
-      </div>
-      <div className="card state-card">
-        <p className={messageClass}>{message}</p>
-        {detail && <p className="state-detail">{detail}</p>}
-      </div>
+    <div className="card state-card">
+      {!variant && <div className="spinner" />}
+      <p className={messageClass}>{message}</p>
+      {detail && <p className="state-detail">{detail}</p>}
     </div>
   );
 }
