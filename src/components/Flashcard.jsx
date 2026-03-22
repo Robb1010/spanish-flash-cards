@@ -1,29 +1,19 @@
 import { useState, useRef } from 'react';
+import { normalize } from '../lib/normalize';
 
-const TENSE_COLOR = {
-  present: { badge: '#2980b9', label: 'Presente' },
-  preterite: { badge: '#c0392b', label: 'Pret\u00e9rito' },
+const TENSE_LABEL = {
+  present: 'Presente',
+  preterite: 'Pret\u00e9rito',
 };
 
 export default function Flashcard({ card, onCheck, onNext, isLast }) {
   const [input, setInput] = useState('');
-  const [status, setStatus] = useState(null); // null | "correct" | "hint" | "wrong"
+  const [status, setStatus] = useState(null);
   const [revealed, setRevealed] = useState(false);
   const [shake, setShake] = useState(false);
   const [pop, setPop] = useState(false);
   const [hintUsed, setHintUsed] = useState(false);
   const cardRef = useRef(null);
-
-  const tenseInfo = TENSE_COLOR[card.tense] || TENSE_COLOR.present;
-
-  function normalize(s) {
-    return s
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z]/g, '');
-  }
 
   function checkAnswer() {
     if (!input.trim()) return;
@@ -42,18 +32,10 @@ export default function Flashcard({ card, onCheck, onNext, isLast }) {
     setTimeout(() => cardRef.current?.focus(), 0);
   }
 
-  function handleNext() {
-    onNext();
-  }
-
-  function showHint() {
-    setHintUsed(true);
-  }
-
   function handleKey(e) {
     if (e.key === 'Enter') {
       if (!revealed) checkAnswer();
-      else handleNext();
+      else onNext();
     }
   }
 
@@ -63,8 +45,8 @@ export default function Flashcard({ card, onCheck, onNext, isLast }) {
       <div className="verb-display">{card.verb}</div>
       <div className="pronoun-row">
         <div className="pronoun">{card.pronoun}</div>
-        <span className="tense-badge" style={{ background: tenseInfo.badge }}>
-          {tenseInfo.label}
+        <span className="tense-badge" data-tense={card.tense}>
+          {TENSE_LABEL[card.tense] || card.tense}
         </span>
       </div>
 
@@ -91,7 +73,7 @@ export default function Flashcard({ card, onCheck, onNext, isLast }) {
         />
         <div className="input-buttons">
           {!revealed && !hintUsed && (
-            <button className="btn-hint" onClick={showHint} type="button">
+            <button className="btn-hint" onClick={() => setHintUsed(true)} type="button">
               Hint
             </button>
           )}
@@ -114,7 +96,7 @@ export default function Flashcard({ card, onCheck, onNext, isLast }) {
       )}
 
       {revealed && (
-        <button className="btn-next" onClick={handleNext}>
+        <button className="btn-next" onClick={onNext}>
           {isLast ? 'Finish' : 'Next card \u2192'}
         </button>
       )}

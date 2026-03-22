@@ -4,6 +4,7 @@ import { useSession } from './hooks/useSession';
 import Flashcard from './components/Flashcard';
 import SessionSummary from './components/SessionSummary';
 import ProgressBar from './components/ProgressBar';
+import StatusScreen from './components/StatusScreen';
 
 export default function App() {
   const { deck, loading, error, reload } = useDeck();
@@ -17,8 +18,7 @@ export default function App() {
   }, [deck]);
 
   function handleCheck(quality) {
-    const card = deck[index];
-    recordAnswer(card, quality);
+    recordAnswer(deck[index], quality);
   }
 
   function handleRestart() {
@@ -27,58 +27,28 @@ export default function App() {
   }
 
   if (loading) {
-    return (
-      <div className="container">
-        <div className="header">
-          <h1>Espa&ntilde;ol</h1>
-          <p>Verb Conjugation Trainer</p>
-        </div>
-        <div className="card" style={{ textAlign: 'center', padding: '60px 32px' }}>
-          <p style={{ color: '#7a6040', fontSize: '1.1rem' }}>Loading cards...</p>
-        </div>
-      </div>
-    );
+    return <StatusScreen message="Loading cards..." />;
   }
 
   if (error) {
     return (
-      <div className="container">
-        <div className="header">
-          <h1>Espa&ntilde;ol</h1>
-          <p>Verb Conjugation Trainer</p>
-        </div>
-        <div className="card" style={{ textAlign: 'center', padding: '40px 32px' }}>
-          <p style={{ color: '#922', fontSize: '0.95rem', marginBottom: 12 }}>
-            Could not connect to database.
-          </p>
-          <p style={{ color: '#7a6040', fontSize: '0.82rem' }}>
-            Check your <code>.env.local</code> Supabase credentials and reload.
-          </p>
-        </div>
-      </div>
+      <StatusScreen
+        variant="error"
+        message="Could not connect to database."
+        detail="Check your .env.local Supabase credentials and reload."
+      />
     );
   }
 
   if (deck.length === 0) {
     return (
-      <div className="container">
-        <div className="header">
-          <h1>Espa&ntilde;ol</h1>
-          <p>Verb Conjugation Trainer</p>
-        </div>
-        <div className="card" style={{ textAlign: 'center', padding: '60px 32px' }}>
-          <p style={{ color: '#2a7a48', fontSize: '1.1rem', marginBottom: 8 }}>
-            {'\u2713'} No cards due!
-          </p>
-          <p style={{ color: '#7a6040', fontSize: '0.88rem' }}>
-            Come back later for your next review session.
-          </p>
-        </div>
-      </div>
+      <StatusScreen
+        variant="success"
+        message={'\u2713 No cards due!'}
+        detail="Come back later for your next review session."
+      />
     );
   }
-
-  const card = deck[index];
 
   return (
     <div className="container">
@@ -97,9 +67,8 @@ export default function App() {
       {done ? (
         <SessionSummary score={score} total={deck.length} onRestart={handleRestart} />
       ) : (
-        <Flashcard key={card.id} card={card} onCheck={handleCheck} onNext={advance} isLast={index === deck.length - 1} />
+        <Flashcard key={deck[index].id} card={deck[index]} onCheck={handleCheck} onNext={advance} isLast={index === deck.length - 1} />
       )}
-
     </div>
   );
 }

@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ensureUser } from '../lib/userId';
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+import { shuffle } from '../lib/shuffle';
 
 const SESSION_LIMIT = 20;
 
@@ -33,10 +25,7 @@ export function useDeck() {
       if (cardsErr) throw cardsErr;
       if (progErr) throw progErr;
 
-      const progressMap = new Map();
-      for (const p of progress) {
-        progressMap.set(p.card_id, p);
-      }
+      const progressMap = new Map(progress.map((p) => [p.card_id, p]));
 
       const now = new Date();
 
