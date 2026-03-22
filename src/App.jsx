@@ -16,10 +16,9 @@ export default function App() {
     }
   }, [deck]);
 
-  function handleAnswer(quality) {
+  function handleCheck(quality) {
     const card = deck[index];
     recordAnswer(card, quality);
-    advance();
   }
 
   function handleRestart() {
@@ -98,12 +97,9 @@ export default function App() {
       {done ? (
         <SessionSummary score={score} total={deck.length} onRestart={handleRestart} />
       ) : (
-        <Flashcard key={card.id} card={card} onAnswer={handleAnswer} />
+        <Flashcard key={card.id} card={card} onCheck={handleCheck} onNext={advance} isLast={index === deck.length - 1} />
       )}
 
-      <p style={{ color: '#5a4830', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
-        PRESS ENTER TO CHECK &middot; ENTER AGAIN TO ADVANCE
-      </p>
     </div>
   );
 }

@@ -118,7 +118,13 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: white;
-  margin-bottom: 20px;
+}
+
+.pronoun-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
 }
 
 .hint {
@@ -153,7 +159,6 @@ body {
   border-radius: 8px;
   font-size: 1.1rem;
   font-weight: 500;
-  margin-top: 10px;
 }
 
 .divider {

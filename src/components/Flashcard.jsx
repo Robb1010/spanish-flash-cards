@@ -5,7 +5,7 @@ const TENSE_COLOR = {
   preterite: { badge: '#c0392b', label: 'Pret\u00e9rito' },
 };
 
-export default function Flashcard({ card, onAnswer }) {
+export default function Flashcard({ card, onCheck, onNext, isLast }) {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState(null); // null | "correct" | "hint" | "wrong"
   const [revealed, setRevealed] = useState(false);
@@ -38,11 +38,12 @@ export default function Flashcard({ card, onAnswer }) {
       setTimeout(() => setShake(false), 500);
     }
     setRevealed(true);
+    onCheck(correct ? (hintUsed ? 'hint' : 'correct') : 'wrong');
     setTimeout(() => cardRef.current?.focus(), 0);
   }
 
   function handleNext() {
-    onAnswer(status || 'wrong');
+    onNext();
   }
 
   function showHint() {
@@ -58,13 +59,14 @@ export default function Flashcard({ card, onAnswer }) {
 
   return (
     <div ref={cardRef} className={`card ${shake ? 'shake' : ''} ${pop ? 'pop' : ''}`} tabIndex={-1} onKeyDown={handleKey}>
-      <span className="tense-badge" style={{ background: tenseInfo.badge }}>
-        {tenseInfo.label}
-      </span>
-
       <div className="hint">{card.hint}</div>
       <div className="verb-display">{card.verb}</div>
-      <div className="pronoun">{card.pronoun}</div>
+      <div className="pronoun-row">
+        <div className="pronoun">{card.pronoun}</div>
+        <span className="tense-badge" style={{ background: tenseInfo.badge }}>
+          {tenseInfo.label}
+        </span>
+      </div>
 
       {hintUsed && !revealed && (
         <div className="hint-reveal">
@@ -113,7 +115,7 @@ export default function Flashcard({ card, onAnswer }) {
 
       {revealed && (
         <button className="btn-next" onClick={handleNext}>
-          Next card {'\u2192'}
+          {isLast ? 'Finish' : 'Next card \u2192'}
         </button>
       )}
     </div>
