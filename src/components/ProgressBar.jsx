@@ -1,7 +1,7 @@
 export default function ProgressBar({ current, total }) {
   const progress = Math.round(((current + 1) / total) * 100);
   return (
-    <div>
+    <div className="progress-wrap">
       <div className="progress-bar-wrap">
         <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
       </div>
